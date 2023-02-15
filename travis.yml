@@ -1,0 +1,38 @@
+language: java
+dist: jammy
+jdk: openjdk17
+
+addons:
+  sonarqube: true
+
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+    - $HOME/.sonar/cache
+
+jobs:
+  include:
+  - stage: "Build"
+    name: "Gradle build"
+    script:
+      - ./gradlew clean build
+  - stage: "Code compliance"
+    name: "FOSSA"
+    script:
+      - >-
+        curl -H 'Cache-Control: no-cache'
+        https://raw.githubusercontent.com/mdsol/fossa_ci_scripts/main/travis_ci/fossa_install.sh |
+        bash -s -- -b $TRAVIS_BUILD_DIR
+      - >-
+        curl -H 'Cache-Control: no-cache'
+        https://raw.githubusercontent.com/mdsol/fossa_ci_scripts/main/travis_ci/fossa_run.sh |
+        bash -s -- -b $TRAVIS_BUILD_DIR
+  - name: "Sonar Scan"
+    if: branch = master
+    script:
+      - sonar-scanner -D sonar.host.url=$SONAR_HOST_URL -D sonar.login=$SONAR_TOKEN -X
+
+stages:
+  - name: "Build"
+  - name: "Code compliance"
