@@ -1,5 +1,4 @@
 language: java
-dist: jammy
 jdk: openjdk17
 
 addons:
